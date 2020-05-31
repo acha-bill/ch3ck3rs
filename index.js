@@ -2,6 +2,7 @@ require('dotenv').config();
 const setUpMongoose = require('./bootstrap/mongoose');
 const createServer = require('./src/server');
 const appConfig = require('./app.config');
+const ioService = require('./src/services/io');
 
 async function init () {
   await setUpMongoose(appConfig.mongoUrl);
@@ -13,6 +14,9 @@ init().then(server => {
   server.listen(process.env.PORT, async () => {
     console.log(`Listening at http://localhost:${appConfig.port} in ${appConfig.env} mode`);
   });
+
+  const io = require('socket.io')(server);
+  ioService.setIO(io);
 });
 
 if (process.env.NODE_ENV === 'production') {
