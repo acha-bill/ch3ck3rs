@@ -4,6 +4,7 @@ const GenericCrudService = require('./generic-crud-service');
 const ioService = require('./io');
 const Board = require('./board');
 const userService = require('./users');
+const Events = require('../enums/events');
 
 const sockMap = new Map();
 const boardMap = new Map();
@@ -29,7 +30,7 @@ class GameService extends GenericCrudService {
       });
 
       const nsp = ioService.getOrCreateNamespace(namespace);
-      nsp.on('connection', handleConnection);
+      nsp.on(Events.on.CONNECTION, handleConnection);
       return game;
     } catch (e) {
       console.log(e);
@@ -64,8 +65,8 @@ class GameService extends GenericCrudService {
       createdAt: new Date().getTime()
     };
     inviteMap.set(invite.id, invite);
-    socket.emit('invite', invite);
-    socket.on('invite-reply', reply => handleInviteReply(reply, game, from, fromSocketId, to, toSocketId, message));
+    socket.emit(Events.emit.INVITE, invite);
+    socket.on(Events.on.INVITE_REPLY, reply => handleInviteReply(reply, game, from, fromSocketId, to, toSocketId, message));
   }
 
   async updateVisibility (game, visible) {
@@ -101,8 +102,8 @@ async function handleInviteReply (reply, game, from, fromSocketId, to, toSocketI
       invite,
       message: 'invite expires after 3 mins'
     };
-    fromSocket.emit('invite-expired', inviteExpired);
-    toSocket.emit('invite-expired', inviteExpired);
+    fromSocket.emit(Events.emit.INVITE_EXPIRED, inviteExpired);
+    toSocket.emit(Events.emit.INVITE_EXPIRED, inviteExpired);
     inviteMap.delete(invite.id);
   }
 
@@ -112,14 +113,14 @@ async function handleInviteReply (reply, game, from, fromSocketId, to, toSocketI
 
   boardMap.set(game.id, board);
   const nspc = ioService.getOrCreateNamespace(game.namespace);
-  nspc.emit('board', {
+  nspc.emit(Events.emit.BOARD, {
     board,
     game
   });
   userService.addGame(from.id, game.id);
   userService.addGame(to.id, game.id);
-  fromSocket.on('move', data => handleMove(data, game, fromSocket, from, nspc));
-  toSocket.on('move', data => handleMove(data, game, toSocket, to, nspc));
+  fromSocket.on(Events.on.MOVE, data => handleMove(data, game, fromSocket, from, nspc));
+  toSocket.on(Events.on.MOVE, data => handleMove(data, game, toSocket, to, nspc));
 }
 
 /**
@@ -142,7 +143,7 @@ async function handleMove (move, game, socket, user, nspc) {
   }
   const board = boardMap.get(game.id);
   const result = board.move(move);
-  nspc.emit('move-result', {
+  nspc.emit(Events.emit.MOVE_RESULT, {
     from: user.id,
     move: result,
     nextTurn: board.turn
@@ -166,7 +167,7 @@ async function handleMove (move, game, socket, user, nspc) {
  */
 function handleDisconnect (user, socket, nsp) {
   sockMap.delete(socket.id);
-  nsp.emit('user-left', { id: user.id });
+  nsp.emit(Events.emit.USER_LEFT, { id: user.id });
 }
 
 /**
@@ -178,7 +179,7 @@ function handleDisconnect (user, socket, nsp) {
  * @param {namspace} nsp
  */
 function handleChat (chat, user, socket, nsp) {
-  nsp.emit('chat', { userId: user.id, chat });
+  nsp.emit(Events.emit.CHAT, { userId: user.id, chat });
 }
 
 /**
@@ -189,9 +190,9 @@ function handleChat (chat, user, socket, nsp) {
  */
 function handleConnection (user, socket, nsp) {
   sockMap.set(socket.id, user.id);
-  nsp.emit('user-joined', { id: user.id });
-  socket.on('disconnect', () => handleDisconnect(user, socket, nsp));
-  socket.on('chat', chat => handleChat(chat, user, socket, nsp));
+  nsp.emit(Events.emit.USER_JOINED, { id: user.id });
+  socket.on(Events.on.DISCONNECT, () => handleDisconnect(user, socket, nsp));
+  socket.on(Events.on.CHAT, chat => handleChat(chat, user, socket, nsp));
 }
 
 /** @typedef {import('../models/game').GameSchema} Game */
