@@ -1,7 +1,9 @@
 class Board {
   constructor (player1, player1Col, player2, player2Col) {
-    this.turn = null;
+    this.players = [player1, player2];
+    this.turn = -1;
     this.board = [];
+    this.winner = -1;
     for (let i = 0; i < 8; i++) {
       const row = [];
       for (let j = 0; j < 8; j++) {
@@ -22,9 +24,44 @@ class Board {
           piece.setPos(pos);
         }
         pos.piece = piece;
+        row.push(pos);
       }
       this.board.push(row);
     }
+  }
+
+  move (move) {
+    const fromCoord = move.from;
+    const toCoord = move.to;
+    console.log(fromCoord, toCoord);
+    const pos = this.getPosition(fromCoord);
+    if (!pos || !pos.piece || this.winner > -1) {
+      console.log('invalid move');
+      return null;
+    }
+    const piece = pos.piece;
+    console.log(piece);
+    // validate move
+    // check that the move.to position is not occupied
+    // check that it is 'black'
+    // check that it's diagonal straight line from the from.pos
+    // check the number of places wants to move
+    // if it's an even number, check that there are enemy pieces in every middle position
+    //  if so, chop those pieces
+    // if it's an odd number, check that it's 1.
+
+    // if all good,
+    // if valid, move piece to new position
+    // add move to piece's list of moves
+
+    this.turn = (this.turn + 1) % 2;
+
+    // check if game has winner
+    return move;
+  }
+
+  getPosition (coord) {
+    return this.board[coord.i][coord.j];
   }
 }
 

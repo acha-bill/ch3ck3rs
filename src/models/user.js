@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+const ObjectId = mongoose.SchemaTypes.ObjectId;
 
 /**
  *  @swagger
@@ -26,7 +27,8 @@ const saltRounds = 10;
  *    userName: string,
  *    fullName: string,
  *    photoURL: string,
- *    password: string
+ *    password: string,
+ *    games: Array
  *  } & import('mongoose').MongooseDocument}
  *  UserSchema
  */
@@ -48,7 +50,11 @@ const UserSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true
-  }
+  },
+  games: [{
+    type: ObjectId,
+    ref: 'Game'
+  }]
 }, {
   timestamps: true,
   strict: true

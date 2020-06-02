@@ -14,6 +14,19 @@ class UserService extends GenericCrudService {
   async findByUsername (username) {
     return this.findOne({ username });
   }
+
+  /**
+   * Adds a game to the user game list
+   * @param {String} userId
+   * @param {String} gameId
+   */
+  async addGame (userId, gameId) {
+    return this.findByIdAndUpdate(userId, {
+      $push: {
+        games: gameId
+      }
+    });
+  }
 }
 
 /** @typedef {import('../models/user').UserSchema} User */

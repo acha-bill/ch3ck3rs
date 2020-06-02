@@ -33,6 +33,10 @@ const GameSchema = new mongoose.Schema({
   visible: {
     type: Boolean,
     default: true
+  },
+  active: {
+    type: Boolean,
+    default: true
   }
 }, {
   timestamps: true,
