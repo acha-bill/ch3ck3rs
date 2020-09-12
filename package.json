@@ -44,7 +44,7 @@
     "jsonwebtoken": "^8.5.1",
     "mongodb-memory-server": "^6.0.1",
     "mongoose": "^5.9.3",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "socket-io": "^1.0.0",
     "socket.io": "^2.3.0",
     "swagger-jsdoc": "^3.5.0",
